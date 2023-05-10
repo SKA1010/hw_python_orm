@@ -1,3 +1,4 @@
+from pprint import pprint
 import sqlalchemy
 import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -67,11 +68,22 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 publ = input("Введите имя или id писателя: ")
-if publ.isnumeric():
-    for i in session.query(Shop.name).join(Stock.shop_stock).join(Stock.book_stock).join(Book.publ_book).filter(Publisher.id == int(publ)).all():
-            print(i)
+
+shops_publ = set()
+
+shops = session.query(Shop.name).join(Stock.shop_stock).join(Stock.book_stock).join(Book.publ_book)
+
+if publ.isdigit():  
+    shops = shops.filter(Publisher.id == publ).all()
 else:
-    for i in session.query(Shop.name).join(Stock.shop_stock).join(Stock.book_stock).join(Book.publ_book).filter(Publisher.name == str(publ)).all():
-        print(i)
+    shops = shops.filter(Publisher.name == str(publ)).all() 
+
+for i in shops:
+    shops_publ.update(i)
+
+if len(shops_publ):
+    print(shops_publ)
+else:
+    print("Книг данного писателя не найдено")
 
 session.close()
